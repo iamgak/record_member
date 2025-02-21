@@ -14,12 +14,12 @@ Record Members to manage Record
 ### Installation
 1. Clone the repository:
     ```bash
-    git clone github.com/iamgak/record_members
+    git clone github.com/iamgak/atlanta_assesment
     ```
 
 2. Navigate to the project directory:
     ```bash
-    cd record_members/public
+    cd atlanta_assesment/public
     ```
 
 3. Run the script:

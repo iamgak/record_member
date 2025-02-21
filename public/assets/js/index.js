@@ -11,6 +11,7 @@ $(document).ready(function () {
     btn_close.onclick = function () {
         modal.style.display = "none";
     }
+    
     span.onclick = function () {
         modal.style.display = "none";
     }
@@ -56,8 +57,9 @@ $(document).ready(function () {
                         }
                     } else {
                         $('.records-list').append($('<li>').attr('data-id', data.id).append('<h3>' + name + '</h3>'));
-                        modal.style.display = "none";
+                        // modal.style.display = "none";
                     }
+
                     $('#parent_id').append(`<option value="${data.id}" data-id="${parentId}">${name}</option>`);
                     modal.style.display = "none";
                     $('form[data-action="create"]').trigger('reset');
