@@ -1,82 +1,129 @@
-/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
+header {
+    background-color: #3f43c6;
+    color: white;
+    padding: 1em;
+    text-align: center;
+}
+
+main {
     padding: 20px;
 }
 
-/* Record List Styles */
-.records-list {
-    list-style-type: none;
-    padding: 0;
-}
-
-.records-list li {
-    background-color: #f4f4f4;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-/* Form Styles */
-form {
-    margin-bottom: 20px;
-}
-
-form label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-form input, form textarea {
-    width: 100%;
-    padding: 5px;
-    margin-bottom: 10px;
-}
-
-form button {
-    background-color: #4CAF50;
+footer {
+    background-color: #333;
     color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
+    text-align: center;
+    padding: 1em;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+#button1 {
+    background-color: #7bb13c;
+    color: white;
+    border-radius: 4px;
 }
+
+#button2 {
+    background-color: #2962ff;
+    color: white;
+    border-radius: 4px;
+}
+
+#topBar {
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.breadcrumb-item.active {
+    font-size: 96%;
+    /* Reduces font size by 10% */
+    color: #848df0;
+    /* Changes text color to white */
+}
+
+#dataTableContainer {
+    position: relative;
+    top: -50px;
+}
+
+.f32 .flag {
+    vertical-align: middle;
+    margin: -8px 0;
+}
+
+progress {
+    width: 100%;
+}
+
+
+/* Style for the table */
+#example {
+    /* Set a solid border for the table */
+    border-radius: 10px;
+    /* Make the corners rounded */
+    overflow: hidden;
+    /* Ensures rounded corners are visible */
+}
+
+/* Optional: Style for table cells */
+#example td {
+    padding-left: 12px;
+    /* text-transform: uppercase; */
+    color: #54585c;
+    font-size: small;
+    font-weight: 600;
+}
+
+/* Style for the table header */
+#example thead {
+    background-color: #3762ff;
+    color: white;
+}
+
+#example thead th {
+    padding: 10px;
+    /* Add some padding for better spacing */
+    text-align: left;
+    /* Align text to the left */
+    font-weight: bold;
+    /* Make the header text bold */
+    font-size: small;
+    border: none;
+    /* Removes borders from header cells */
+}
+
+
+.modal-header {
+    background-color: #3f51b5;
+    color: white;
+}
+
+.required {
+    color: red;
+}
+
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 30%;
+    font-size: medium;
 }
 
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+input::placeholder {
+    font-size: small;
+    color: #babec2;
+    font-weight: 400;
+    /* Adjust this value as needed */
 }
 
-.close-button:hover,
-.close-button:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+select option {
+    font-size: small;
+    color: #babec2;
+    font-weight: 400;
 }
