@@ -32,8 +32,7 @@ let table = new DataTable('#example', {
             "width": "10%"
         },
         {
-            data: 'action', // TO DO: Pass id here
-
+            data: 'action',
             render: function (id, type, row) {
                 return `<button 
                             type="button" 
@@ -55,8 +54,7 @@ let table = new DataTable('#example', {
                                 <img src="uploads/default/delete.png" alt="" style="height: 16px; width: 16px;">
                         </button>`;
             },
-            "width": "5%" // Adjusted width to accommodate both buttons
-
+            "width": "5%"
         }
 
     ]
@@ -72,28 +70,44 @@ function fillModalValue(id) {
             document.querySelector('#edit-emailId').value = data.data.email;
             document.querySelector('#edit-address').value = data.data.address;
             document.querySelector('#edit-dob').value = data.data.dob;
-            getIndex('edit-gender', data.data.gender);
-            getIndex('edit-designation', data.data.designation);
-            getIndex('edit-role', data.data.role);
-            getIndex('edit-account_status', data.data.account_status);
+            setIndex('edit-gender', data.data.gender);
+            setIndex('edit-role', data.data.role);
+            setIndex('edit-account_status', data.data.account_status);
             document.querySelector('#edit-id').value = data.data.id;
             const radioButtons = document.querySelectorAll('#edit-marital_status input[name="marital_status"]');
             radioButtons.forEach(radio => {
                 if (radio.value == data.data.marital_status) {
                     radio.checked = true;
-                    console.log(radioButtons,radio)
+                    console.log(radioButtons, radio)
                 }
             });
+
+            let selectElement = document.querySelector('#edit-designation')
+            let option = document.createElement('option');
+            option.innerHTML = "Please Select Designation";
+            selectElement.appendChild(option);
+            data.designations.forEach(designation => {
+                option = document.createElement('option');
+                // console.log(selectElement,designation.id, data.data.designation)
+                option.value = designation.id;
+                option.innerHTML = designation.name;
+                selectElement.appendChild(option);
+            });
+
+            setIndex('edit-designation', data.data.designation);
+            
         })
         .catch(error => console.error('Error fetching data:', error));
 }
 
-function getIndex(name, val) {
+function setIndex(name, val) {
     let a = document.querySelector(`#${name}`);
     for (let i = 0; i < a.options.length; i++) {
         let option = a.options[i];
+        // console.log(name,val)
         if (option.value == val) {
             a.selectedIndex = i
+            console.log(a,name,val,i)
             break
         }
     }
@@ -108,3 +122,35 @@ myModal.addEventListener('show.bs.modal', function (event) {
         displayElement.value = id;
     }
 })
+
+function fetchDesignation(curr) {
+    let id = curr.value
+    fetch(`/fetchDesignation?id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            let selectElement = curr.closest('form').querySelector('select[name="designation"]')
+            if (data.success) {
+                selectElement.options.length = 0
+                if (data.designations) {
+                    let option = document.createElement('option');
+                    option.innerHTML = "Please Select Designation";
+                    selectElement.appendChild(option);
+                    data.designations.forEach(designation => {
+                        option = document.createElement('option');
+                        option.value = designation.id;
+                        option.innerHTML = designation.name;
+                        selectElement.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.innerHTML = 'Please Select Correct Role';
+                    selectElement.appendChild(option);
+                }
+            }
+        })
+        .catch((error) => {
+            alert('Internal Server Error. Try Again Later!!!')
+            console.log(error)
+        })
+}

@@ -102,16 +102,6 @@ class TeamRecordManager
         $sql = "SELECT * FROM $this->table_name WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-
-    public function readRecords($limit, $offset): array
-    {
-        $sql = "SELECT * FROM $this->table_name LIMIT $limit OFFSET $offset";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -248,36 +238,53 @@ class TeamRecordManager
             }
         }
 
-        if (!empty($_POST['mobile']) && !preg_match('/^\d{10}$/', $_POST['mobile'])) {
+        if (!preg_match('/^\d{10}$/', $_POST['mobile'])) {
             return 'Invalid mobile number';
         }
 
-        if (!empty($_POST['email']) && !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
             return 'Invalid email address';
         }
 
-        if (!empty($_POST['dob']) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['dob'])) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['dob'])) {
             return 'Invalid date of birth format (YYYY-MM-YYYY)';
         }
 
-        if (!empty($_POST['marital_status']) && !in_array($_POST['marital_status'], [1, 2])) {
-            return 'Marital status field must be 1 or 2';
+        if (!$this->validDataSelected('atl_type_marital_status', $_POST['marital_status'])) {
+            return 'Marital status must be from dropdown';
         }
 
-        if (!empty($_POST['account_status']) && !in_array($_POST['account_status'], [1, 2])) {
-            return 'Account status field must be 1 or 2';
+        if (!$this->validDataSelected('atl_type_account_status', $_POST['account_status'])) {
+            return 'Account status must be from dropdown';
         }
 
-        if (!empty($_POST['role']) && !in_array($_POST['role'], [1, 2, 3, 4])) {
-            return 'Select Role from dropdown only';
+        if (!$this->validDataSelected('atl_type_role', $_POST['role'])) {
+            return 'Role from the dropdown only';
         }
 
-        if (!empty($_POST['designation']) && !in_array($_POST['designation'], [1, 2, 3, 4])) {
-            return 'Select Designation from dropdown only';
+        if (!$this->validDataSelected('atl_type_designation', $_POST['designation'])) {
+            return 'Designation must be from dropdown';
+        }
+        
+        if (!$this->validDataSelected('atl_type_gender', $_POST['gender'])) {
+            return 'Gender must be from dropdown';
         }
 
-        if (!empty($_POST['gender']) && !in_array($_POST['gender'], [1, 2, 3])) {
-            return 'Select Gender from dropdown only';
+        // if (!in_array($_POST['designation'], [1, 2, 3, 4, 5, 6])) {
+        //     return 'Select Designation from dropdown only';
+        // }
+
+        // if (!in_array($_POST['gender'], [1, 2, 3])) {
+        //     return 'Select Gender from dropdown only';
+        // }
+
+
+        // if (!in_array($_POST['role'], [1, 2, 3])) {
+        //     return 'Select Gender from dropdown only';
+        // }
+
+        if (!$this->validDesignation($_POST['role'], $_POST['designation'])) {
+            return 'Incorrect Designation Selected';
         }
 
         return;
@@ -288,15 +295,40 @@ class TeamRecordManager
         $sql = "SELECT 1 FROM $this->table_name WHERE email = :email";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['email' => $email]);
-        return $stmt->rowCount() ? true: false;
+        return $stmt->rowCount() ? true : false;
+    }
+
+
+    public function validDataSelected($table_name, $id)
+    {
+        $sql = "SELECT 1 FROM `$table_name` WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->rowCount() ? true : false;
+    }
+
+    public function validDesignation($role_id, $designation_id)
+    {
+        $sql = "SELECT 1 FROM `atl_type_designation` WHERE id = :id AND role_id = :role_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['role_id' => $role_id, 'id' => $designation_id]);
+        return $stmt->rowCount() ? true : false;
     }
 
     public function emailChanged($email, $id)
     {
         $sql = "SELECT 1 FROM $this->table_name WHERE email = :email AND id = :id";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['email' => $email,'id'=> $id]);
-        return $stmt->rowCount() ? true: false;
+        $stmt->execute(['email' => $email, 'id' => $id]);
+        return $stmt->rowCount() ? true : false;
+    }
+
+    public function fetchDesignationByID($id)
+    {
+        $sql = "SELECT id, name FROM `atl_type_designation` WHERE role_id = $id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     public function validateImage()
@@ -311,7 +343,7 @@ class TeamRecordManager
 
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             if (!preg_match("~^" . $this->allowed_mime_types . "$~", finfo_file($finfo, $file['tmp_name']))) {
-                return 'Uploaded file should be image and jpg format only' ;
+                return 'Uploaded file should be image and jpg format only';
             }
         }
 

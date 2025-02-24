@@ -12,6 +12,7 @@ try {
   $pdo = $db->getConnection();
 } catch (\PDOException $e) {
   echo 'Connection failed: ' . $e->getMessage();
+  die;
 }
 
 $recordManager = new TeamRecordManager($pdo);
@@ -99,18 +100,28 @@ switch ($url) {
       'data' => $data
     ]));
 
+  case "/fetchDesignation":
+    if (!empty($_GET['id']) && preg_match('~^[1-9]\d*$~', $_GET['id'])) {
+      $record = $recordManager->fetchDesignationByID($_GET['id']);
+      die(json_encode(['success' => true, 'designations' => $record]));
+    }
+
+    http_response_code(400);
+    die(json_encode(['error' => 'Missing ID parameter ' . $_GET['id']]));
+
   case "/fetchByID":
 
-    if (!empty($_GET['id'])) {
+    if (!empty($_GET['id']) && preg_match('~^[1-9]\d*$~', $_GET['id'])) {
       $record = $recordManager->readRecordById($_GET['id']);
-      die(json_encode(['success' => true, 'data' => $record[0]]));
+      $designations =  $recordManager->fetchDesignationByID($record[0]['role']);
+      die(json_encode(['success' => true, 'data' => $record[0], 'designations' => $designations]));
     }
 
     http_response_code(400);
     die(json_encode(['error' => 'Missing ID parameter']));
 
   case "/delete":
-    if (!empty($_GET['id'])) {
+    if (!empty($_GET['id']) && preg_match('~^[1-9]\d*$~', $_GET['id'])) {
       $validationErrors =  $recordManager->validId($_GET['id']);
 
       if (!empty($validationErrors)) {
@@ -134,14 +145,10 @@ if ($url != '/') {
   die;
 }
 
-// $types = new Type();
-// var_dump($types);die;
 $genders =  $type->readTable('gender');
 $marital_status =  $type->readTable('marital_status');
 $account_status =  $type->readTable('account_status');
 $roles =  $type->readTable('role');
-$designations =  $type->readTable('designation');
-// var_dump($gender, $marital_status, $account_status, $role, $designation);
 ?>
 
 <!DOCTYPE html>
@@ -240,27 +247,25 @@ $designations =  $type->readTable('designation');
                     <input type="text" class="form-control" id="inputAddress" name="address" required />
                   </div>
                 </div>
+
                 <div class="row mb-3">
                   <div class="col">
-                    <label for="designation" class="form-label">Designation<span class="required">*</span></label>
-                    <select id="designation" class="form-select" name="designation">
-                      <option value="">Select Designation</option>
-
-                      <?php foreach ($designations as $designation) { ?>
-                        <option value="<?php echo $designation['id']; ?>"><?php echo $designation['name']; ?></option>
-                      <?php } ?>
-                    </select>
-                  </div>
-
-
-                  <div class="col">
                     <label for="role" class="form-label">Role<span class="required">*</span></label>
-                    <select id="role" class="form-select" name="role">
+                    <select id="role" class="form-select" onchange="fetchDesignation(this)" name="role">
                       <option value="">Select Role</option>
 
                       <?php foreach ($roles as $role) { ?>
                         <option value="<?php echo $role['id']; ?>"><?php echo $role['name']; ?></option>
                       <?php } ?>
+                    </select>
+                  </div>
+
+                  <div class="col">
+                    <label for="designation" class="form-label">Designation<span class="required">*</span></label>
+                    <select id="designation" class="form-select" name="designation">
+                      <option value="">Select Role First</option>
+
+
                     </select>
                   </div>
 
@@ -315,7 +320,7 @@ $designations =  $type->readTable('designation');
             </div>
             <div class="modal-footer">
               <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
-              <button type="button" class="btn btn-primary" onclick="">Save</button>
+              <button type="button" class="btn btn-primary" onclick="">Create Profile</button>
             </div>
           </div>
         </div>
@@ -360,24 +365,20 @@ $designations =  $type->readTable('designation');
                   </div>
                 </div>
                 <div class="row mb-3">
-                  <div class="col">
-                    <label for="edit-designation" class="form-label">Designation<span class="required">*</span></label>
-                    <select id="edit-designation" class="form-select" name="designation">
-                      <option value="">Select Designation</option>
-                      <?php foreach ($designations as $designation) { ?>
-                        <option value="<?php echo $designation['id']; ?>"><?php echo $designation['name']; ?></option>
-                      <?php } ?>
-                    </select>
-                  </div>
-
 
                   <div class="col">
                     <label for="edit-role" class="form-label">Role<span class="required">*</span></label>
-                    <select id="edit-role" class="form-select" name="role">
+                    <select id="edit-role" class="form-select" name="role" onchange="fetchDesignation(this)">
                       <option value="">Select Role</option>
                       <?php foreach ($roles as $role) { ?>
                         <option value="<?php echo $role['id']; ?>"><?php echo $role['name']; ?></option>
                       <?php } ?>
+                    </select>
+                  </div>
+
+                  <div class="col">
+                    <label for="edit-designation" class="form-label">Designation<span class="required">*</span></label>
+                    <select id="edit-designation" class="form-select"  name="designation">
                     </select>
                   </div>
 
@@ -432,7 +433,7 @@ $designations =  $type->readTable('designation');
               </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-dark" name="edit_id" id="editButton">Add Team</button>
+              <button type="button" class="btn btn-dark" name="edit_id" id="editButton">Edit Profile</button>
             </div>
           </div>
         </div>
@@ -507,6 +508,7 @@ $designations =  $type->readTable('designation');
             if (data.error) {
               alert(data.error)
             } else {
+              f.reset()
               location.reload()
             }
           })
